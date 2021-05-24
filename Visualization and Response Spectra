@@ -1,0 +1,78 @@
+#PLOTTING GROUND ACCELERATION
+import numpy as np
+import matplotlib.pyplot as plt
+wb = xlrd.open_workbook('/home/taylan/Desktop/244 proje/data/excel.xlsx');
+sheet = wb.sheet_by_index(0);
+n=0;
+array=np.zeros(48000);
+for j in range(9600):
+for i in range(5):
+array[n]=(sheet.cell_value(j,i));
+n=n+1;
+t=np.arange(0,240,0.005);
+plt.plot(t,array);
+plt.title('Time History Plot of the Ground Acceleration');
+plt.xlabel('Time(s)');
+plt.ylabel('Acceleration(g)');
+plt.show();
+
+#SOLVING DIFFERENTIAL EQUATIONS, FORMING THE RESPONSE SPECTRA
+def cdm(m,z,w,h,f,di,vi):
+nf = len(f);
+d = np.zeros((nf));
+v = np.zeros((nf));
+a = np.zeros((nf));
+h2 = h**2;
+c = (2 * z * w * m);
+k = m * w**2;
+d[0] = di;
+v[0] = vi;
+a[0] = (f[0] / m) - ((w ** 2) * di) - (2 * z * w * vi);
+d[-1] = d[0] - h * vi - ((h ** 2) * a[0] / 2);
+c1 = 1 / ((m / h2) + c / (2 * h));
+c2 = (k) - ((2 * m) / h2);
+c3 = ((m / h ** 2) - (c / (2 * h)));
+c4 = 1 / (2 * h);
+d[1] = c1 * (f[0] - c2 * di - c3 * d[-1]);
+n = range(1, nf-1);
+for i in n:
+d[i+1] = c1*(f[i]-c2*d[i]-c3*d[i-1]);
+v[i] = c4*(d[i+1]-d[i-1]);
+a[i] = (f[i] / m) - (w**2 * d[i]) - (2*z*w*v[i]);
+return d,v,a;
+wb = xlrd.open_workbook('/home/taylan/Desktop/244 proje/data/excel.xlsx');
+sheet = wb.sheet_by_index(0);
+n=0;
+array=np.zeros(48000);
+for j in range(9600):
+for i in range(5):
+array[n]=(sheet.cell_value(j,i));
+n=n+1;
+t=np.arange(0,240,0.005);
+pi=math.pi
+dt=0.005;
+m=1;
+s=array*m;
+T=np.arange(0.1,3,0.1);
+W=2*pi/T;
+
+def find_kritik_2(W):
+_, _, a = cdm(m,0.02,W,dt,s,0,0)
+return max(a);
+def find_kritik_5(W):
+_, _, a = cdm(m,0.05,W,dt,s,0,0)
+return max(a);
+def find_kritik_10(W):
+_, _, a = cdm(m,0.1,W,dt,s,0,0)
+return max(a);
+list2 = [find_kritik_2(x) for x in W];
+list5 = [find_kritik_5(x) for x in W];
+list10 = [find_kritik_10(x) for x in W];
+plt.plot(T,list2,'b-',label='z=2');
+plt.plot(T,list5,label='z=5');
+plt.plot(T,list10,label='z=10');
+plt.title('Acceleration Response Spectra');
+plt.xlabel('Period(s)');
+plt.ylabel('a(g)');
+plt.legend(loc='best');
+plt.show();
