@@ -1,0 +1,78 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import math
+
+def pem(m, z, om, h, f, di, vi):
+    ni = 0;
+    nf = len(f);
+    d = np.zeros((nf));
+    v = np.zeros((nf));
+    a = np.zeros((nf));
+
+    om2 = om ** 2;
+    zom = 2 * z * om;
+    k = m * om2;
+    ik = 1 / k;
+    ih = 1 / h;
+    ikh = 1 / (k * h);
+
+    d[0] = di;
+    v[0] = vi;
+    a[0] = (f[0] / m) - (om2 * di) - (zom * vi);
+
+    sz = math.sqrt(1 - (z ** 2));
+
+    dom = om * sz;
+    exh = math.exp((-1) * om * z * h);
+    sh = math.sin(dom * h);
+    ch = math.cos(dom * h);
+
+    e1 = (2 * z) / (om * h);
+    e2 = -1 - e1;
+    e3 = (1 - (2 * (z ** 2))) / (dom * h);
+    e4 = e3 - (z / sz);
+
+    a1 = exh * (ch + (z / sz) * sh);
+    a2 = exh * sh / dom;
+    a3 = ik * (e1 + exh * ((e2 * ch) + (e4 * sh)));
+    a4 = ik * (1 - e1 + exh * ((e1 * ch) - (e3 * sh)));
+
+    b1 = (-1) * exh * om * sh / sz;
+    b2 = exh * (ch - (z * sh / sz));
+    b3 = ik * ((-ih) + exh * ((ih * ch) + (((om / sz) + (z * ih / sz)) * sh)));
+    b4 = ikh * (1 - exh * (ch + (z * sh / sz)));
+
+    n = range(1, nf);
+    for i in n:
+        d[i] = a1 * d[i - 1] + a2 * v[i - 1] + a3 * f[i - 1] + a4 * f[i];
+        v[i] = b1 * d[i - 1] + b2 * v[i - 1] + b3 * f[i - 1] + b4 * f[i];
+        a[i] = (f[i] / m) - (om2 * d[i]) - (zom * v[i]);
+
+    return d, v, a;
+
+
+pi=math.pi
+dt=0.01;
+t=np.arange(0,150+dt,dt);
+fom=math.sqrt(1);
+s=np.sin(fom*t);
+m=1
+z=0.02
+om=math.sqrt(10)
+
+dT,vT,aT = pem(m,z,om,dt,s,0,0)
+
+plt.figure('fig_x');
+plt.plot(t,dT);
+plt.figure('fig_v');
+plt.plot(t,vT);
+plt.figure('fig_a');
+plt.plot(t,aT);
+plt.show();
+#print(dT);
+#plt.plot(t,s);
+#plt.show();
+
+
+
