@@ -1,0 +1,120 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import math
+
+def nm(m,z,w,h,f,di,vi,y,B):
+    ni = 0;
+    nf = len(f);
+    d = np.zeros((nf));
+    v = np.zeros((nf));
+    a = np.zeros((nf));
+    df = np.zeros((nf));
+    dd = np.zeros((nf));
+    dv = np.zeros((nf));
+    da = np.zeros((nf));
+    f1 = np.zeros((nf));
+    #h2 = h**2;
+    #c = (2 * z * w * m);
+    #k = m * w**2;
+    d[0] = di;
+    v[0] = vi;
+    a[0] = (f[0] / m) - ((w ** 2) * di) - (2 * z * w * vi);
+    k = m*(w**2);
+    c = 2*z*w*m;
+    k1=k+((y*c)/(B*dt))+m/(B*(dt**2));
+    a1=m/(B*(dt))+(y*c)/B;
+    b1=m/(2*B)+c*dt*((y/(2*B))-1);
+
+    #d[-1] = d[0] - h * vi - ((h ** 2) * a[0] / 2);
+
+    #c1 = 1 / ((m / h2) + c / (2 * h));
+    #c2 = (k) - ((2 * m) / h2);
+    #c3 = ((m / h ** 2) - (c / (2 * h)));
+    #c4 = 1 / (2 * h);
+    #d[1] = c1 * (f[0] - c2 * di - c3 * d[-1]);
+
+    n = range(1, nf-1);
+    for i in n:
+        #df[i] = f[i+1]-f[i]+a1*v[i]+b1*a[i];
+        #dd[i] = df[i]/k1;
+        #dv[i]=(dd[i]*y)/(B*dt)-(v[i]*y/B)+dt*a[i]*(1-y/(2*B));
+        #da[i]=dd[i]/(B*(dt**2))-dv[i]/(B*dt)-a[i]/(2*B);
+        #d[i+1]=d[i]+dd[i];
+        #v[i + 1] = v[i] + dv[i];
+        #a[i + 1] = a[i] + da[i];
+        f1[i] = f[i+1]-f[i]+a1*v[i]+b1*a[i];
+        d[i+1] = f1[i]/k1+d[i];
+        v[i+1]=((d[i+1]-d[i])*y)/(B*dt)-(v[i]*y/B)+dt*a[i]*(1-y/(2*B))+v[i];
+        a[i+1]=(d[i+1]-d[i])/(B*(dt**2))-dv[i]/(B*dt)-a[i]/(2*B)+a[i];
+
+
+    return f,d,v,a;
+
+#pi=math.pi
+#w=math.sqrt(10);
+#dt=0.01;
+#t=np.arange(0,150+dt,dt);
+#fom=math.sqrt(1);
+#s=np.sin(fom*t);
+#m=1;
+#z=0.02;
+
+w=6.28;
+dt=0.1;
+#t=np.arange(0,150+dt,dt);
+#fom=math.sqrt(1);
+#s=np.sin(fom*t);
+m=0.2533;
+z=0.05;
+
+s = [0,5,8.66,10,8.66,5,0,0,0,0,0];
+t = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
+dF,dT,vT,aT = nm(m,z,w,dt,s,0,0,1/2,1/4)
+
+plt.figure('fig_x');
+plt.plot(t,dT);
+plt.figure('fig_v');
+plt.plot(t,vT);
+plt.figure('fig_a');
+plt.plot(t,aT);
+#plt.show();
+k = m*(w**2);
+c = 2*z*w*m;
+y=1/2;
+B=1/4;
+k1=k+((y*c)/(B*dt))+m/(B*(dt**2));
+a1=m/(B*(dt))+(y*c)/B;
+b1=m/(2*B)+c*dt*((y/(2*B))-1);
+nf = len(s);
+d = np.zeros((nf));
+v = np.zeros((nf));
+a = np.zeros((nf));
+df1 = np.zeros((nf));
+dd = np.zeros((nf));
+dv = np.zeros((nf));
+da = np.zeros((nf));
+ds = np.zeros((nf));
+f1 = np.zeros((nf));
+di=0;
+vi=0;
+d[0] = di;
+v[0] = vi;
+
+a[0] = (s[0] / m) - ((w ** 2) * di) - (2 * z * w * vi);
+
+
+
+n = range(0, nf-1);
+for i in n:
+    ds[i]=s[i+1]-s[i];
+    df1[i] = s[i+1]-s[i]+a1*v[i]+b1*a[i];
+    dd[i] = df1[i]/k1;
+    dv[i]=(dd[i]*y)/(B*dt)-(v[i]*y/B)+dt*a[i]*(1-y/(2*B));
+    da[i]=-1*(dd[i]/(B*(dt**2))-dv[i]/(B*dt)-a[i]/(2*B));
+    d[i+1]=d[i]+dd[i];
+    v[i + 1] = v[i] + dv[i];
+    a[i + 1] = a[i] + da[i];
+
+for i in n:
+    print("ds[i]",ds[i],"df1[i]",int(df1[i]),"dd[i]",dd[i],"dv[i]",dv[i],"da[i]",int(da[i]),"d[i]",int(d[i]),"v[i]",int(v[i]),"a[i]",int(a[i]));
